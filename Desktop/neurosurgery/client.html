@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chat</title>
+  <style>
+    #chatHistory {
+      height: 300px;
+      overflow-y: scroll;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Chat Application</h1>
+
+  <div id="chatHistory"></div>
+
+  <div id="messageContainer">
+    <input type="text" id="messageInput" placeholder="Type your message..." />
+    <button id="sendButton">Send</button>
+  </div>
+  <div class="message">
+    <div class="message__outer">
+        <div class="message__avatar"></div>
+        <div class="message__inner">
+            <div class="message__bubble"></div>
+            <div class="message__actions"></div>
+            <div class="message__spacer"></div>
+        </div>
+        <div class="message__status"></div>
+    </div>
+</div>
+
+  <script>
+    const socket = new WebSocket('ws://localhost:3000');
+
+    socket.addEventListener('open', (event) => {
+      console.log('Connected to server');
+    });
+
+    socket.addEventListener('message', (event) => {
+      const message = event.data;
+      const chatHistory = document.getElementById('chatHistory');
+      chatHistory.innerHTML += `<p>${message}</p>`;
+      chatHistory.scrollTop = chatHistory.scrollHeight; // Scroll to the bottom
+    });
+
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+
+    sendButton.addEventListener('click', () => {
+      sendMessage();
+    });
+
+    messageInput.addEventListener('keypress', (event) => {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    });
+
+    function sendMessage() {
+      const message = messageInput.value.trim();
+      if (message !== '') {
+        socket.send(message);
+        messageInput.value = '';
+      }
+    }
+  </script>
+</body>
+</html>
+
